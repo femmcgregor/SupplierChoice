@@ -4,4 +4,8 @@ Rails.application.routes.draw do
   end
 
   get "/products", to: "products#index"
+
+  resources :product_equivalences, only: :create do
+    get :comparison, on: :member
+  end
 end

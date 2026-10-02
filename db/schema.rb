@@ -10,9 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_01_180017) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_01_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "product_equivalences", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "pack_size", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "products", force: :cascade do |t|
     t.bigint "vendor_id", null: false
@@ -21,6 +28,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_180017) do
     t.decimal "price", precision: 10, scale: 2, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "product_equivalence_id"
+    t.index ["product_equivalence_id", "vendor_id"], name: "index_products_on_equivalence_and_vendor", unique: true, where: "(product_equivalence_id IS NOT NULL)"
+    t.index ["product_equivalence_id"], name: "index_products_on_product_equivalence_id"
     t.index ["vendor_id", "sku"], name: "index_products_on_vendor_id_and_sku", unique: true
     t.index ["vendor_id"], name: "index_products_on_vendor_id"
   end
@@ -31,5 +41,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_01_180017) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "products", "product_equivalences"
   add_foreign_key "products", "vendors"
 end
