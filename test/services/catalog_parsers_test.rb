@@ -42,6 +42,19 @@ class CatalogParsersTest < ActiveSupport::TestCase
     ], rows
   end
 
+  test "HarborParser imports every product from the sample catalog" do
+    contents = Rails.root.join("imports/harbor/sample_catalog.hb").read
+
+    rows = CatalogParsers::HarborParser.new(contents).call
+
+    assert_equal [
+      { "sku" => "000002", "name" => "Chicken Thighs", "price" => "10.99" },
+      { "sku" => "000003", "name" => "Corn, Canned", "price" => "1.99" },
+      { "sku" => "000004", "name" => "Peas, Canned", "price" => "1.5" },
+      { "sku" => "000007", "name" => "Chicken Breasts", "price" => "20.95" }
+    ], rows
+  end
+
   test "HarborParser raises when a product block is missing a name or price" do
     error = assert_raises(CatalogParsers::InvalidFile) do
       CatalogParsers::HarborParser.new(<<~HB).call

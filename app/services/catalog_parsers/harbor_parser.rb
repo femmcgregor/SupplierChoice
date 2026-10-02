@@ -1,10 +1,9 @@
 module CatalogParsers
   class HarborParser < BaseParser
-    # Format contract: a SKU is 000 followed by one or more digits.
-    # Each matching line starts a record. Names may span multiple lines,
-    # but no description line may match this SKU pattern. The last line
-    # before the next SKU (or EOF) is the price. Blank lines are ignored.
-    PRODUCT_CODE = /\A000\d+\z/.freeze
+    # A record code may have an optional V prefix. Lines after the price
+    # contain pack details and are not part of the product name.
+    PRODUCT_CODE = /\AV?000\d+\z/.freeze
+    PRICE = /\A\d+(?:\.\d{1,2})?\z/.freeze
 
     def call
       lines = normalized_contents.lines.map(&:strip).reject(&:empty?)
@@ -38,12 +37,13 @@ module CatalogParsers
 
       body = block.drop(1)
 
-      if body.length < 2
+      price_index = body.rindex { |line| line.match?(PRICE) }
+      if price_index.nil? || price_index.zero?
         raise InvalidFile, "Harbor product #{sku} is missing a name or price"
       end
 
-      price = body.last
-      name = body[0...-1].join(" ").strip
+      price = body[price_index]
+      name = body[0...price_index].join(" ").strip
 
       if name.empty? || price.to_s.strip.empty?
         raise InvalidFile, "Harbor product #{sku} is missing a name or price"

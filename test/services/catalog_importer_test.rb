@@ -83,6 +83,22 @@ class CatalogImporterTest < ActiveSupport::TestCase
     assert_equal BigDecimal("10.99"), @vendor.products.find_by!(sku: "000002").price
   end
 
+  test "imports Corn and Peas from the Harbor sample catalog" do
+    harbor = Vendor.create!(name: "Harbor Supply Co.")
+    contents = Rails.root.join("imports/harbor/sample_catalog.hb").read
+
+    result = CatalogImporter.new(
+      vendor: harbor,
+      contents: contents,
+      parser_class: CatalogParsers::HarborParser
+    ).call
+
+    assert_equal 4, result[:created]
+    assert_equal 0, result[:failed]
+    assert_equal BigDecimal("1.99"), harbor.products.find_by!(sku: "000003").price
+    assert_equal BigDecimal("1.5"), harbor.products.find_by!(sku: "000004").price
+  end
+
   private
 
   def import(contents)
