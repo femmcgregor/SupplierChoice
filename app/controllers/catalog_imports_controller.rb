@@ -6,7 +6,7 @@ class CatalogImportsController < ApplicationController
     file = params[:file]
 
     unless file.is_a?(ActionDispatch::Http::UploadedFile)
-      return render json: { error: "Upload a CSV using the file field" },
+      return render json: { error: "Upload a catalog using the file field" },
                     status: :bad_request
     end
 
@@ -15,9 +15,19 @@ class CatalogImportsController < ApplicationController
                     status: :bad_request
     end
 
+    config = CatalogImporter.directory_config.values.find do |entry|
+      entry.fetch(:vendor_name) == vendor.name
+    end
+
+    unless config
+      return render json: { error: "No catalog parser is configured for this vendor" },
+                    status: :unprocessable_entity
+    end
+
     result = CatalogImporter.new(
       vendor: vendor,
-      contents: file.read
+      contents: file.read,
+      parser_class: config.fetch(:parser_class)
     ).call
 
     render json: result, status: :ok

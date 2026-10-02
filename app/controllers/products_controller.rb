@@ -47,13 +47,16 @@ class ProductsController < ApplicationController
 
   private
 
-  def positive_integer_param(name, default: nil)
-    value = params[name]
-    return default if value.blank?
+def positive_integer_param(name, default: nil)
+  value = params[name]
+  return default if value.nil? || value == ""
 
-    integer = Integer(value)
-    integer if integer.positive?
-  rescue ArgumentError, TypeError
-    nil
-  end
+  return nil unless value.is_a?(String) || value.is_a?(Integer)
+
+  text = value.to_s
+  return nil unless text.match?(/\A[0-9]+\z/)
+
+  integer = Integer(text, 10)
+  integer if integer.positive?
+end
 end

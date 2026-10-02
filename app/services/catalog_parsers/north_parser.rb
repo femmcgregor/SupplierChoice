@@ -24,7 +24,11 @@ module CatalogParsers
         raise InvalidFile, "Missing required columns: #{missing.join(', ')}"
       end
 
-      table.map do |row|
+      table.each.with_index(1).map do |row, record_number|
+        unless row.fields.length == table.headers.length
+          raise InvalidFile,
+                "CSV record #{record_number} has #{row.fields.length} fields; expected #{table.headers.length}"
+        end
         REQUIRED_HEADERS.to_h { |header| [ header, row[header] ] }
       end
     rescue CSV::MalformedCSVError => error

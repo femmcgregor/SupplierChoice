@@ -1,5 +1,9 @@
 module CatalogParsers
   class HarborParser < BaseParser
+    # Format contract: a SKU is 000 followed by one or more digits.
+    # Each matching line starts a record. Names may span multiple lines,
+    # but no description line may match this SKU pattern. The last line
+    # before the next SKU (or EOF) is the price. Blank lines are ignored.
     PRODUCT_CODE = /\A000\d+\z/.freeze
 
     def call

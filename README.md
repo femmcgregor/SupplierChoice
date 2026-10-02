@@ -12,7 +12,7 @@ The app currently supports:
 - Ruby 3.x
 - Bundler
 - PostgreSQL
-- Rails 8
+- Rails 8.1.4
 
 ## Local setup
 
@@ -77,6 +77,37 @@ Chicken Breasts
 
 The Harbor format is parsed as a block of lines beginning with a product code (`000xxx`). The final line in each block is treated as the price, and the remaining lines are joined into the product name.
 
+## Catalog imports
+
+Upload a catalog for a configured vendor with a multipart `file` field. The parser is selected from the vendor, and uploads are limited to 2 MB.
+
+```sh
+curl -X POST http://localhost:3000/vendors/1/catalog_imports \
+   -F 'file=@imports/north/sample_catalog.csv'
+```
+
+## Products API
+
+`GET /products` returns a JSON array of products. Filter by vendor and paginate with optional query parameters:
+
+```sh
+curl 'http://localhost:3000/products?vendor_id=1&page=1&per_page=20'
+```
+
+`vendor_id` is optional. `page` defaults to 1, and `per_page` defaults to 20 with a maximum of 100. The response includes `X-Page`, `X-Per-Page`, `X-Total-Count`, and `X-Total-Pages` headers. Invalid parameter values return `400 Bad Request`.
+
+## Product comparisons
+
+Create a comparison by explicitly linking product IDs from different vendors. All linked products share the declared pack size; names are descriptive and are not used to infer equivalence.
+
+```sh
+curl -X POST http://localhost:3000/product_equivalences \
+   -H 'Content-Type: application/json' \
+   -d '{"name":"Long Grain Rice","pack_size":"10 lb bag","product_ids":[12,34]}'
+```
+
+The response includes all linked offers, the cheapest offer, savings per pack, and an explanation. Retrieve the comparison again with `GET /product_equivalences/:id/comparison`. For example: “North's Long Grain Rice (10 lb bag) costs $18.50 per pack and Harbor's equivalent pack costs $17.95 per pack, so Harbor saves $0.55 per pack.”
+
 ## Demo walkthrough
 
 1. Start the app:
@@ -111,6 +142,6 @@ The Harbor format is parsed as a block of lines beginning with a product code (`
 
 ## Notes
 
-- The importer validates rows before saving changes.
-- Invalid rows are tracked in the result payload without committing partial successful rows from the same import.
+- The importer parses the complete file before saving rows; malformed files do not save any products.
+- After parsing succeeds, valid rows are saved independently. Row validation failures are reported in the result while other valid rows from the same import remain saved.
 - The Harbor parser accepts variable-length blocks as long as each new product starts with a `000xxx` code.
