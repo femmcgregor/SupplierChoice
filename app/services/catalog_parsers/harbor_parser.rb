@@ -13,7 +13,7 @@ module CatalogParsers
       lines.each do |line|
         if line.match?(PRODUCT_CODE)
           products << parse_block(current_block) if current_block.any?
-          current_block = [line]
+          current_block = [ line ]
         else
           current_block << line
         end

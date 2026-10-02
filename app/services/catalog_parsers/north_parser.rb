@@ -25,7 +25,7 @@ module CatalogParsers
       end
 
       table.map do |row|
-        REQUIRED_HEADERS.to_h { |header| [header, row[header]] }
+        REQUIRED_HEADERS.to_h { |header| [ header, row[header] ] }
       end
     rescue CSV::MalformedCSVError => error
       raise InvalidFile, "Invalid CSV: #{error.message}"

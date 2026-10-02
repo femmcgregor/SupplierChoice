@@ -16,8 +16,8 @@ class CatalogImporterTest < ActiveSupport::TestCase
 
     assert_equal 1, result[:created]
     assert_equal 3, result[:failed]
-    assert_equal [2, 3, 4], result[:errors].pluck(:record)
-    assert_equal ["TEST-1"], @vendor.products.pluck(:sku)
+    assert_equal [ 2, 3, 4 ], result[:errors].pluck(:record)
+    assert_equal [ "TEST-1" ], @vendor.products.pluck(:sku)
   end
 
   test "repeated imports update products without duplicates" do
@@ -78,7 +78,7 @@ class CatalogImporterTest < ActiveSupport::TestCase
     ).call
 
     assert_equal 3, result[:created]
-    assert_equal ["000001", "000002", "000003"], @vendor.products.order(:sku).pluck(:sku)
+    assert_equal [ "000001", "000002", "000003" ], @vendor.products.order(:sku).pluck(:sku)
     assert_equal "Chicken Thighs", @vendor.products.find_by!(sku: "000002").name
     assert_equal BigDecimal("10.99"), @vendor.products.find_by!(sku: "000002").price
   end

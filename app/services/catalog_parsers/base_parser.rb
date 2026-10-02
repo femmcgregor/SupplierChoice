@@ -1,5 +1,4 @@
 module CatalogParsers
-
   class BaseParser
     def initialize(contents)
       @contents = contents
